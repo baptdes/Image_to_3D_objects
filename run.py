@@ -31,7 +31,7 @@ def main():
     depth_model_size = "small"  # Depth Anything v2 model size: "small", "base", "large"
     
     # Device settings
-    device = 'cpu'  # Force CPU for stability
+    device = 'cuda'  # Force CPU for stability
     
     # Detection settings
     conf_threshold = 0.25  # Confidence threshold for object detection
