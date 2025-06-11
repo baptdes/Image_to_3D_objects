@@ -9,7 +9,7 @@ class ObjectDetector:
     """
     Object detection using YOLOv11 from Ultralytics
     """
-    def __init__(self, model_size='small', conf_thres=0.25, iou_thres=0.45, classes=None, device=None):
+    def __init__(self, model_size='small', conf_thres=0.25, iou_thres=0.45, classes=None, device=None, model_path=None):
         """
         Initialize the object detector
         
@@ -19,6 +19,7 @@ class ObjectDetector:
             iou_thres (float): IoU threshold for NMS
             classes (list): List of classes to detect (None for all classes)
             device (str): Device to run inference on ('cuda', 'cpu', 'mps')
+            model_path (str): Path to custom YOLO weights file (optional)
         """
         # Determine device
         if device is None:
@@ -49,14 +50,24 @@ class ObjectDetector:
         
         model_name = model_map.get(model_size.lower(), model_map['small'])
         
-        # Load model
+        # Load model (use custom weights if provided)
         try:
-            self.model = YOLO(model_name)
-            print(f"Loaded YOLOv11 {model_size} model on {self.device}")
+            if model_path is not None:
+                self.model = YOLO(model_path)
+                print(f"Loaded custom YOLO model from {model_path} on {self.device}")
+            else:
+                self.model = YOLO(model_name)
+                print(f"Loaded YOLOv11 {model_size} model on {self.device}")
         except Exception as e:
             print(f"Error loading model: {e}")
             print("Trying to load with default settings...")
             self.model = YOLO(model_name)
+
+        # Print classes available in the model
+        if hasattr(self.model, 'names'):
+            print(f"Model classes: {self.model.names}")
+        else:
+            print("Model does not have class names attribute")
         
         # Set model parameters
         self.model.overrides['conf'] = conf_thres
@@ -240,4 +251,4 @@ class ObjectDetector:
         Returns:
             list: List of class names
         """
-        return self.model.names 
+        return self.model.names

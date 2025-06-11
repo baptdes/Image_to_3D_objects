@@ -16,10 +16,12 @@ def main():
     parser.add_argument('--date', type=str, required=True, help='KITTI date (e.g. 2011_09_26)')
     parser.add_argument('--drive', type=str, required=True, help='KITTI drive (e.g. 0001)')
     parser.add_argument('--output_path', type=str, default='output.mp4', help='Path to output video file')
+    parser.add_argument('--yolo_weights', type=str, default=None, help='Path to custom YOLO weights file')
     args = parser.parse_args()
 
     # Fixed KITTI base directory
-    kitti_basedir = "/home/nimdaba/Documents/Image_to_3D_objects/KITTI_dataset"
+    kitti_basedir = "KITTI_dataset"
+    yolo_weights = "KITTI_dataset/best.pt"
 
     # Model/config
     yolo_model_size = "nano"
@@ -47,7 +49,8 @@ def main():
             conf_thres=conf_threshold,
             iou_thres=iou_threshold,
             classes=classes,
-            device=device
+            device=device,
+            model_path= yolo_weights
         )
     except Exception as e:
         print(f"Error initializing object detector: {e}")
@@ -56,7 +59,8 @@ def main():
             conf_thres=conf_threshold,
             iou_thres=iou_threshold,
             classes=classes,
-            device='cpu'
+            device='cpu',
+            model_path= yolo_weights
         )
 
     try:
