@@ -528,14 +528,6 @@ class BBox3DEstimator:
             cv2.putText(image, score_text, (x1, text_y), 
                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)"""
         
-        # Draw a vertical line from the bottom of the box to the ground
-        # This helps with depth perception
-        ground_y = y2 + int(height * 0.2)  # A bit below the bottom of the box
-        cv2.line(image, (int((x1 + x2) / 2), y2), (int((x1 + x2) / 2), ground_y), color, thickness)
-        
-        # Draw a small circle at the bottom to represent the ground contact point
-        cv2.circle(image, (int((x1 + x2) / 2), ground_y), thickness * 2, color, -1)
-        
         return image
     
     def cleanup_trackers(self, active_ids):
