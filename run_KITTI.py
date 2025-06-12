@@ -81,8 +81,6 @@ def main():
     out = cv2.VideoWriter(args.output_path, fourcc, fps, (width, height))
 
     frame_count = 0
-    start_time = time.time()
-    fps_display = "FPS: --"
 
     print("Starting processing...")
 
@@ -101,6 +99,7 @@ def main():
             detection_frame = frame.copy()
             result_frame = frame.copy()
 
+            # First : 2D detection with YOLO
             try:
                 detection_frame, detections = detector.detect(detection_frame, track=enable_tracking)
             except Exception as e:
@@ -109,6 +108,7 @@ def main():
                 cv2.putText(detection_frame, "Detection Error", (10, 60), 
                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
+            # Second : Depth estimation
             try:
                 depth_map = depth_estimator.estimate_depth(original_frame)
                 depth_colored = depth_estimator.colorize_depth(depth_map)
@@ -119,20 +119,17 @@ def main():
                 cv2.putText(depth_colored, "Depth Error", (10, 60), 
                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
+            # Third : 3D bounding box estimation
             boxes_3d = []
             active_ids = []
+            # For each 2D detection
             for detection in detections:
                 try:
+                    # Gathering information from detection
                     bbox, score, class_id, obj_id = detection
                     class_name = detector.get_class_names()[class_id]
-                    if class_name.lower() in ['person', 'cat', 'dog']:
-                        center_x = int((bbox[0] + bbox[2]) / 2)
-                        center_y = int((bbox[1] + bbox[3]) / 2)
-                        depth_value = depth_estimator.get_depth_at_point(depth_map, center_x, center_y)
-                        depth_method = 'center'
-                    else:
-                        depth_value = depth_estimator.get_depth_in_region(depth_map, bbox, method='median')
-                        depth_method = 'median'
+                    depth_value = depth_estimator.get_depth_in_region(depth_map, bbox, method='median')
+                    depth_method = 'median'
                     box_3d = {
                         'bbox_2d': bbox,
                         'depth_value': depth_value,
@@ -153,14 +150,10 @@ def main():
             for box_3d in boxes_3d:
                 try:
                     class_name = box_3d['class_name'].lower()
-                    if 'car' in class_name or 'vehicle' in class_name:
+                    if 'car' in class_name:
                         color = (0, 0, 255)
                     elif 'person' in class_name:
                         color = (0, 255, 0)
-                    elif 'bicycle' in class_name or 'motorcycle' in class_name:
-                        color = (255, 0, 0)
-                    elif 'potted plant' in class_name or 'plant' in class_name:
-                        color = (0, 255, 255)
                     else:
                         color = (255, 255, 255)
                     result_frame = bbox3d_estimator.draw_box_3d(result_frame, box_3d, color=color)
@@ -168,38 +161,23 @@ def main():
                     print(f"Error drawing box: {e}")
                     continue
 
-            frame_count += 1
-            if frame_count % 10 == 0:
-                end_time = time.time()
-                elapsed_time = end_time - start_time
-                fps_value = frame_count / elapsed_time
-                fps_display = f"FPS: {fps_value:.1f}"
-
-            cv2.putText(result_frame, f"{fps_display} | Device: {device}", (10, 30), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-
-            try:
-                depth_height = height // 4
-                depth_width = depth_height * width // height
-                depth_resized = cv2.resize(depth_colored, (depth_width, depth_height))
-                result_frame[0:depth_height, 0:depth_width] = depth_resized
-            except Exception as e:
-                print(f"Error adding depth map to result: {e}")
+            cv2.putText(result_frame, f"Device: {device}", (10, 30), 
+           cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
 
             out.write(result_frame)
             cv2.imshow("3D Object Detection", result_frame)
-            # cv2.imshow("Depth Map", depth_colored)
-            # cv2.imshow("Object Detection", detection_frame)
+
+            frame_count += 1
 
             key = cv2.waitKey(1)
-            if key == ord('q') or key == 27 or (key & 0xFF) == ord('q') or (key & 0xFF) == 27:
+            if key == ord('q') or key == 27 or (key & 0xFF) == ord('q') or (key & 0xFF) == 27: # Exit on 'q' or 'Esc'
                 print("Exiting program...")
                 break
 
         except Exception as e:
             print(f"Error processing frame: {e}")
             key = cv2.waitKey(1)
-            if key == ord('q') or key == 27 or (key & 0xFF) == ord('q') or (key & 0xFF) == 27:
+            if key == ord('q') or key == 27 or (key & 0xFF) == ord('q') or (key & 0xFF) == 27: # Exit on 'q' or 'Esc'
                 print("Exiting program...")
                 break
             continue

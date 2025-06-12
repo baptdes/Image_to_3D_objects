@@ -485,45 +485,13 @@ class BBox3DEstimator:
         # Create points for the 3D box
         # Front face (the 2D bounding box)
         front_tl = (x1, y1)
-        front_tr = (x2, y1)
         front_br = (x2, y2)
-        front_bl = (x1, y2)
-        
-        # Back face (offset by depth)
-        back_tl = (x1 + offset_x, y1 - offset_y)
-        back_tr = (x2 + offset_x, y1 - offset_y)
-        back_br = (x2 + offset_x, y2 - offset_y)
-        back_bl = (x1 + offset_x, y2 - offset_y)
         
         # Create a slightly transparent copy of the image for the 3D effect
         overlay = image.copy()
         
         # Draw the front face (2D bounding box)
         cv2.rectangle(image, front_tl, front_br, color, thickness)
-        
-        # Draw the connecting lines between front and back faces
-        cv2.line(image, front_tl, back_tl, color, thickness)
-        cv2.line(image, front_tr, back_tr, color, thickness)
-        cv2.line(image, front_br, back_br, color, thickness)
-        cv2.line(image, front_bl, back_bl, color, thickness)
-        
-        # Draw the back face
-        cv2.line(image, back_tl, back_tr, color, thickness)
-        cv2.line(image, back_tr, back_br, color, thickness)
-        cv2.line(image, back_br, back_bl, color, thickness)
-        cv2.line(image, back_bl, back_tl, color, thickness)
-        
-        # Fill the top face with a semi-transparent color to enhance 3D effect
-        pts_top = np.array([front_tl, front_tr, back_tr, back_tl], np.int32)
-        pts_top = pts_top.reshape((-1, 1, 2))
-        cv2.fillPoly(overlay, [pts_top], color)
-        
-        # Fill the right face with a semi-transparent color
-        pts_right = np.array([front_tr, front_br, back_br, back_tr], np.int32)
-        pts_right = pts_right.reshape((-1, 1, 2))
-        # Darken the right face color for better 3D effect
-        right_color = (int(color[0] * 0.7), int(color[1] * 0.7), int(color[2] * 0.7))
-        cv2.fillPoly(overlay, [pts_right], right_color)
         
         # Apply the overlay with transparency
         alpha = 0.3  # Transparency factor
@@ -548,17 +516,17 @@ class BBox3DEstimator:
         if 'depth_value' in box_3d:
             depth_value = box_3d['depth_value']
             depth_method = box_3d.get('depth_method', 'unknown')
-            depth_text = f"D:{depth_value:.2f} ({depth_method})"
+            depth_text = f"Distance :{depth_value:.2f} ({depth_method})"
             cv2.putText(image, depth_text, (x1, text_y), 
                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
             text_y -= 15
         
         # Get score if available
-        if 'score' in box_3d:
+        """if 'score' in box_3d:
             score = box_3d['score']
             score_text = f"S:{score:.2f}"
             cv2.putText(image, score_text, (x1, text_y), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)"""
         
         # Draw a vertical line from the bottom of the box to the ground
         # This helps with depth perception
