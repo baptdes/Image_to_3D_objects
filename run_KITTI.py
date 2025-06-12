@@ -13,8 +13,8 @@ from bbox3d_utils import BBox3DEstimator, BirdEyeView
 
 def main():
     parser = argparse.ArgumentParser(description="3D Object Detection on KITTI dataset only")
-    parser.add_argument('--date', type=str, required=True, help='KITTI date (e.g. 2011_09_26)')
-    parser.add_argument('--drive', type=str, required=True, help='KITTI drive (e.g. 0001)')
+    parser.add_argument('--date', type=str, default= "2011_09_26", help='KITTI date')
+    parser.add_argument('--drive', type=str, default = "0001", help='KITTI drive')
     parser.add_argument('--output_path', type=str, default='output.mp4', help='Path to output video file')
     parser.add_argument('--yolo_weights', type=str, default=None, help='Path to custom YOLO weights file')
     args = parser.parse_args()
@@ -31,7 +31,6 @@ def main():
     iou_threshold = 0.45
     classes = None
     enable_tracking = True
-    enable_bev = True
 
     print(f"Using device: {device}")
     print(f"Loading KITTI sequence: {kitti_basedir}, {args.date}, {args.drive}")
@@ -76,8 +75,6 @@ def main():
         )
 
     bbox3d_estimator = BBox3DEstimator()
-    if enable_bev:
-        bev = BirdEyeView(scale=60, size=(300, 300))
 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter(args.output_path, fourcc, fps, (width, height))
@@ -170,27 +167,6 @@ def main():
                     print(f"Error drawing box: {e}")
                     continue
 
-            if enable_bev:
-                try:
-                    bev.reset()
-                    for box_3d in boxes_3d:
-                        bev.draw_box(box_3d)
-                    bev_image = bev.get_image()
-                    bev_height = height // 4
-                    bev_width = bev_height
-                    if bev_height > 0 and bev_width > 0:
-                        bev_resized = cv2.resize(bev_image, (bev_width, bev_height))
-                        result_frame[height - bev_height:height, 0:bev_width] = bev_resized
-                        cv2.rectangle(result_frame, 
-                                     (0, height - bev_height), 
-                                     (bev_width, height), 
-                                     (255, 255, 255), 1)
-                        cv2.putText(result_frame, "Bird's Eye View", 
-                                   (10, height - bev_height + 20), 
-                                   cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
-                except Exception as e:
-                    print(f"Error drawing BEV: {e}")
-
             frame_count += 1
             if frame_count % 10 == 0:
                 end_time = time.time()
@@ -211,8 +187,8 @@ def main():
 
             out.write(result_frame)
             cv2.imshow("3D Object Detection", result_frame)
-            cv2.imshow("Depth Map", depth_colored)
-            cv2.imshow("Object Detection", detection_frame)
+            # cv2.imshow("Depth Map", depth_colored)
+            # cv2.imshow("Object Detection", detection_frame)
 
             key = cv2.waitKey(1)
             if key == ord('q') or key == 27 or (key & 0xFF) == ord('q') or (key & 0xFF) == 27:
