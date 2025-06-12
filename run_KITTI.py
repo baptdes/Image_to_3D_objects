@@ -29,7 +29,8 @@ def main():
     device = 'cuda'
     conf_threshold = 0.25
     iou_threshold = 0.45
-    classes = None
+    # Only detect classes 0-6 (Car, Van, Truck, Pedestrian, Person_sitting, Cyclist, Tram) (Not the wtf classes 'misc' and 'dontcare')
+    classes = [0, 1, 2, 3, 4, 5, 6]
     enable_tracking = True
 
     print(f"Using device: {device}")
