@@ -145,8 +145,6 @@ def main():
                     print(f"Error processing detection: {e}")
                     continue
 
-            bbox3d_estimator.cleanup_trackers(active_ids)
-
             for box_3d in boxes_3d:
                 try:
                     class_name = box_3d['class_name'].lower()
