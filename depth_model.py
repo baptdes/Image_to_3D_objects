@@ -44,9 +44,9 @@ class DepthEstimator:
         
         # Map model size to model name
         model_map = {
-            'small': 'depth-anything/Depth-Anything-V2-Small-hf',
-            'base': 'depth-anything/Depth-Anything-V2-Base-hf',
-            'large': 'depth-anything/Depth-Anything-V2-Large-hf'
+            'small': 'depth-anything/Depth-Anything-V2-Metric-Outdoor-Small-hf',
+            'base': 'depth-anything/Depth-Anything-V2-Metric-Outdoor-Base-hf',
+            'large': 'depth-anything/Depth-Anything-V2-Metric-Outdoor-Large-hf'
         }
         
         model_name = model_map.get(model_size.lower(), model_map['small'])
@@ -107,12 +107,6 @@ class DepthEstimator:
             else:
                 # Re-raise the error if not MPS
                 raise
-        
-        # Normalize depth map to 0-1
-        depth_min = depth_map.min()
-        depth_max = depth_map.max()
-        if depth_max > depth_min:
-            depth_map = (depth_map - depth_min) / (depth_max - depth_min)
         
         return depth_map
     
