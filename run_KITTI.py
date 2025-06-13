@@ -164,7 +164,6 @@ def main():
 
             out.write(result_frame)
             cv2.imshow("3D Object Detection", result_frame)
-            cv2.imshow('Depth Estimation', depth_colored)
 
             frame_count += 1
 

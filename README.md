@@ -33,12 +33,6 @@ A real-time 3D object detection system that combines YOLOv11 for object detectio
    pip install -r requirements.txt
    ```
 
-3. Add depthPro
-    ```bash
-    pip install huggingface-hub
-    huggingface-cli download --local-dir checkpoints apple/DepthPro
-    ```
-
 3. Download model weights (will be downloaded automatically on first run)
 
 ## Usage
