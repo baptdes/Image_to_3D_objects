@@ -32,3 +32,5 @@ Thumbs.db
 
 # KITTI dataset files
 KITTI_dataset/
+
+checkpoints/
