@@ -16,3 +16,4 @@ requests>=2.28.0
 transformers>=4.25.0
 pykitti>=0.3.1
 plotly>=5.0.0
+nbformat>=4.2.0
